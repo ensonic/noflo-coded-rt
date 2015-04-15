@@ -1,0 +1,25 @@
+{
+  "name": "noflo-coded-rt",
+  "version": "0.0.1",
+  "description": "noflo runtime with a coded graph",
+  "main": "index.js",
+  "scripts": {
+    "start" : "node index.js"
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Stefan Sauer",
+  "license": "BSD-2-Clause",
+  "dependencies": {
+    "coffee-script": "^1.9.1",
+    "commander": "^2.7.1",
+    "noflo": "^0.5.11",
+    "noflo-core": "^0.1.11",
+    "noflo-filesystem": "^1.0.6",
+    "noflo-math": "0.0.6",
+    "noflo-objects": "^0.1.12",
+    "noflo-packets": "^0.1.6",
+    "noflo-runtime-base": "^0.5.0",
+    "noflo-runtime-websocket": "^0.2.5",
+    "noflo-strings": "^0.1.9"
+  }
+}
