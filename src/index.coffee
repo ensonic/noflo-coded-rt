@@ -11,8 +11,11 @@ program
   .option('--capture-output [true/false]', 'Catch writes to stdout and send to the FBP protocol client (default = false)', false)
   .option('--catch-exceptions [true/false]', 'Catch exceptions and report to the FBP protocol client  (default = true)', true)
   .option('--secret <secret>', 'Secret string to be used for the connection.', null)
+  .option('--cache [true/false]', 'Enable component cache (default = false)', false)
   .option('--interactive [true/false]', 'If true, do not start the graph, if false pass commandline args and start the graph (default = false).', false)
   .parse process.argv
+
+require 'coffee-cache' if program.cache
 
 startServer = (program, graph) ->
   server = http.createServer ->
@@ -33,6 +36,7 @@ startServer = (program, graph) ->
     catchExceptions: program.catchExceptions
     defaultPermissions: permissions[program.secret] unless program.secret
     permissions: permissions if program.secret
+    cache: program.cache
 
   rt.network.on 'addnetwork', (network) ->
     if not program.interactive
