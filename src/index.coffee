@@ -11,6 +11,7 @@ program
   .option('--capture-output [true/false]', 'Catch writes to stdout and send to the FBP protocol client (default = false)', false)
   .option('--catch-exceptions [true/false]', 'Catch exceptions and report to the FBP protocol client  (default = true)', true)
   .option('--secret <secret>', 'Secret string to be used for the connection.', null)
+  .option('--interactive [true/false]', 'If true, do not start the graph, if false pass commandline args and start the graph (default = false).', false)
   .parse process.argv
 
 startServer = (program, graph) ->
@@ -33,12 +34,18 @@ startServer = (program, graph) ->
     defaultPermissions: permissions[program.secret] unless program.secret
     permissions: permissions if program.secret
 
+  rt.network.on 'addnetwork', (network) ->
+    if not program.interactive
+      network.on 'end', (event) ->
+        server.close()
+
   server.listen program.port, ->
-    address = 'ws://' + program.host + ':' + program.port
-    params = 'protocol=websocket&address=' + address
-    params += '&secret=' + program.secret if program.secret
-    console.log 'NoFlo runtime listening at ' + address
-    console.log 'Live IDE URL: <noflo-ui>#runtime/endpoint?' + querystring.escape(params)
+    if program.interactive
+      address = 'ws://' + program.host + ':' + program.port
+      params = 'protocol=websocket&address=' + address
+      params += '&secret=' + program.secret if program.secret
+      console.log 'NoFlo runtime listening at ' + address
+      console.log 'Live IDE URL: <noflo-ui>#runtime/endpoint?' + querystring.escape(params)
     return
   return
 
@@ -55,12 +62,15 @@ createGraph = ->
   graph.addEdge "Split by Lines", "out", "Count Lines", "in"
   graph.addEdge "Count Lines", "count", "Display", "in"
   
-  # Kick the process off by sending filename to fileReader
-  # graph.addInitial "package.json", "Read File", "in"
-  
   console.log 'Created the graph'
-  # This will start the graph
-  # noflo.createNetwork graph
+
+  if not program.interactive
+    if not program.args[0]
+      console.log "Need a filename"
+      return
+
+    graph.addInitial program.args[0], "Read File", "in"
+    noflo.createNetwork graph
   graph
 
 # create graph and start server
