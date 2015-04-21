@@ -77,7 +77,7 @@ startServer = (graph) ->
     console.log 'Created the network'
     addDebug network, program.verbose, false if program.debug
     if not program.interactive
-      network.on 'end', (event) ->
+      network.once 'end', (event) ->
         server.close()
 
   console.log 'Start the server'
