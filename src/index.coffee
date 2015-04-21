@@ -31,7 +31,7 @@ startServer = (program, graph) ->
   ]
   rt = runtime server,
     defaultGraph: graph
-    baseDir: graph.baseDir
+    baseDir: process.env.PROJECT_HOME or process.cwd()
     captureOutput: program.captureOutput
     catchExceptions: program.catchExceptions
     defaultPermissions: permissions[program.secret] unless program.secret
@@ -55,7 +55,6 @@ startServer = (program, graph) ->
 
 createGraph = ->
   graph = noflo.graph.createGraph "linecount"
-  graph.baseDir = process.env.PROJECT_HOME or process.cwd()
   
   graph.addNode "Read File", "filesystem/ReadFile"
   graph.addNode "Split by Lines", "strings/SplitStr"
