@@ -1,22 +1,48 @@
 #!/usr/bin/env node
-program = require 'commander'
 clc = require 'cli-color'
 http = require 'http'
 noflo = require 'noflo'
 runtime = require 'noflo-runtime-websocket'
 querystring = require 'querystring'
 
-program
-  .option('--host <hostname>', 'Hostname or IP for the runtime.', '127.0.0.1')
-  .option('--port <port>', 'Port for the runtime', parseInt, '3569')
-  .option('--capture-output [true/false]', 'Catch writes to stdout and send to the FBP protocol client (default = false)', ((val) -> (val is "true")), false)
-  .option('--catch-exceptions [true/false]', 'Catch exceptions and report to the FBP protocol client  (default = true)', ((val) -> (val is "true")), true)
-  .option('--secret <secret>', 'Secret string to be used for the connection.', null)
-  .option('--debug [true/false]', 'Start the runtime in debug mode (default = false)', ((val) -> (val is "true")), false)
-  .option('--verbose [true/false]', 'Log in verbose format (default = false)', ((val) -> (val is "true")), false)
-  .option('--cache [true/false]', 'Enable component cache (default = false)', ((val) -> (val is "true")), false)
-  .option('--interactive [true/false]', 'If true, do not start the graph, if false pass commandline args and start the graph (default = false).', ((val) -> (val is "true")), false)
-  .parse process.argv
+program = (require 'yargs')
+  .options(
+    host:
+      describe: 'Hostname or IP for the runtime. Use "autodetect" or "autodetect(<iface>)" for dynamic detection.'
+    port:
+      describe: 'Port for the runtime.'
+      type: 'number'
+    'capture-output':
+      default: false
+      description: 'Catch writes to stdout and send to the FBP protocol client'
+      type: 'boolean'
+    'catch-exceptions':
+      default: true
+      description: 'Catch exceptions and report to the FBP protocol client'
+      type: 'boolean'
+    secret:
+      describe: 'Secret string to be used for the connection.'
+    debug:
+      default: false
+      description: 'Start the runtime in debug mode'
+      type: 'boolean'
+    verbose:
+      default: false
+      description: 'Log in verbose format'
+      type: 'boolean'
+    cache:
+      default: false
+      description: 'Enable component cache'
+      type: 'boolean'
+    interactive:
+      default: false
+      description: 'If true, do not start the graph, if false pass commandline args and start the graph'
+      type: 'boolean'
+  )
+  .usage('Usage: $0 [options]')
+  .help('h').alias('h', 'help')
+  .wrap(null)
+  .argv      
 
 require 'coffee-cache' if program.cache
 
@@ -110,10 +136,10 @@ createGraph = ->
   console.log 'Setup the graph'
 
   if not program.interactive
-    if not program.args[0]
+    if program._.length is 0 or not program._[0]
       console.log "Need a filename"
     else
-      graph.addInitial program.args[0], "Read File", "in"
+      graph.addInitial program._[0], "Read File", "in"
   graph
 
 # create graph and start server
